@@ -144,7 +144,7 @@ test("부전공: 제2전공 학점 입력으로 표시과목을 판정하고, �
   assert.equal(findRequirement(result, "subjectArea").detail.entered.total, 38, "표시과목은 입력한 제2전공 학점으로 판정");
 });
 
-test("부전공·복수전공(특수 2전공): 직업교육 중복과목은 특수교육 과목으로 들어가고, 그 외 직업 과목은 무시한다", () => {
+test("부전공·복수전공(특수 2전공): 직업교육 중복과목은 일반 특수교육 과목처럼 세고(한도 없음), 그 외 직업 과목은 무시한다", () => {
   for (const trackId of ["minor", "double-special"]) {
     // 중복과목 5개(직업재활개론 등) + 중복이 아닌 직업 과목(지원고용) + 특수교육 9과목
     const state = stateWithChecked(["02706", "02723", "02721", "04666", "05062", "02728", ...SPECIAL_COURSES], 2023, trackId);
@@ -155,7 +155,8 @@ test("부전공·복수전공(특수 2전공): 직업교육 중복과목은 특�
     assert.equal(special.detail.totalCredits, 42);
     assert.equal(special.completed, true);
     assert.equal(special.detail.basicCourseCount, 9, "중복과목은 특수교육 기본이수로 세지 않는다");
-    assert.equal(result.duplication.accepted.length, 5);
+    assert.equal(result.duplication.accepted.length, 0, "중복 인정 계산(5과목·15학점 한도)을 하지 않는다");
+    assert.equal(result.duplication.overflow.length, 0);
     assert.equal(findRequirement(result, "majorCredits").detail.transcriptCredits, 42);
   }
 });
