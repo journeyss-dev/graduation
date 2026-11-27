@@ -29,6 +29,7 @@ function decideOwnSide(course, state, track) {
 }
 
 // 학생이 체크한 전공 과목을 두 쪽으로 나누고, 직업교육의 중복과목을 특수교육에도 넣어 준다.
+// (직업교육을 쓰지 않는 유형은 중복과목만 특수교육 과목으로 인정한다.)
 // - state: 학생 입력 상태
 // - 반환: { specialSide, jobSide, duplication: { accepted, overflow, credits } }
 //     specialSide / jobSide : 각 요건에서 인정되는 과목 목록 (중복과목 포함)
@@ -38,21 +39,32 @@ export function sortIntoSides(state) {
   const specialSide = [];
   const jobSide = [];
 
-  // 체크한 과목을 원래 속한 쪽에 넣는다. 이수 유형에 맞지 않는 쪽(직업교육 미사용)은 건너뛴다.
+  // 직업교육을 쓰지 않는 이수 유형(부전공, 복수전공-특수 2전공)에서 체크한 직업교육 중복과목
+  const duplicateOnlyCourses = [];
+
+  // 체크한 과목을 원래 속한 쪽에 넣는다.
   for (const course of majorCourses) {
     if (!state.checkedCourses[course.code]) continue;
 
     const ownSide = decideOwnSide(course, state, track);
-    if (ownSide === "job" && !track.usesJobEducation) continue;
+
+    // 직업교육을 쓰지 않는 유형에서는 직업교육 과목을 표시과목으로 세지 않는다.
+    // 다만 중복과목(직업재활개론 등)은 특수교육 과목으로 인정되므로 따로 모아 둔다.
+    if (ownSide === "job" && !track.usesJobEducation) {
+      if (course.canDuplicate) duplicateOnlyCourses.push(course);
+      continue;
+    }
 
     if (ownSide === "special") specialSide.push(course);
     else jobSide.push(course);
   }
 
-  // 중복과목 후보: 직업교육 쪽에서 체크한 과목 중 중복 대상(canDuplicate)인 과목은 특수교육에도 인정된다.
-  // (진단평가를 직업교육에서 선택했다면 여기에 해당하고, 특수교육 기본이수로 선택했다면 해당하지 않는다.)
+  // 중복과목 후보: 중복 대상(canDuplicate)인 직업교육 과목은 특수교육에도 인정된다.
+  //  - 직업교육을 쓰는 유형: 표시과목에서 체크한 중복과목이 특수교육에도 들어간다.
+  //    (진단평가를 직업교육에서 선택했다면 여기에 해당하고, 특수교육 기본이수로 선택했다면 해당하지 않는다.)
+  //  - 직업교육을 쓰지 않는 유형: 표시과목은 없지만, 직업교육 중복과목은 특수교육 과목으로 체크할 수 있다.
   // 2021학번부터는 특수교육 과목을 직업교육 쪽으로 중복 인정하는 경우가 없어서, 반대 방향은 다루지 않는다.
-  const candidates = track.usesJobEducation ? jobSide.filter((course) => course.canDuplicate) : [];
+  const candidates = track.usesJobEducation ? jobSide.filter((course) => course.canDuplicate) : duplicateOnlyCourses;
 
   // 후보를 순서대로 인정하되, 5과목·15학점 한도를 넘으면 초과로 분류한다.
   const accepted = [];

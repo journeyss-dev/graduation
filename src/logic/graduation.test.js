@@ -135,13 +135,37 @@ test("진단평가를 특수교육 기본이수로 선택하면 직업교육·�
   assert.equal(result.duplication.accepted.length, 0);
 });
 
-test("부전공: 직업교육 과목은 무시하고, 제2전공 학점 입력으로 표시과목을 판정한다", () => {
+test("부전공: 제2전공 학점 입력으로 표시과목을 판정하고, 직업교육 과목은 표시과목으로 세지 않는다", () => {
   const state = stateWithChecked([...JOB_COURSES, ...SPECIAL_COURSES], 2023, "minor");
   state.secondMajorCredits = { basic: 21, subjectEducation: 8, total: 38 };
 
   const result = evaluateGraduation(state);
   assert.equal(findRequirement(result, "subjectArea").completed, true);
-  assert.equal(findRequirement(result, "specialEducation").detail.courseCount, 9, "직업 과목은 세지 않는다");
+  assert.equal(findRequirement(result, "subjectArea").detail.entered.total, 38, "표시과목은 입력한 제2전공 학점으로 판정");
+});
+
+test("부전공·복수전공(특수 2전공): 직업교육 중복과목은 특수교육 과목으로 들어가고, 그 외 직업 과목은 무시한다", () => {
+  for (const trackId of ["minor", "double-special"]) {
+    // 중복과목 5개(직업재활개론 등) + 중복이 아닌 직업 과목(지원고용) + 특수교육 9과목
+    const state = stateWithChecked(["02706", "02723", "02721", "04666", "05062", "02728", ...SPECIAL_COURSES], 2023, trackId);
+    const result = evaluateGraduation(state);
+    const special = findRequirement(result, "specialEducation");
+
+    assert.equal(special.detail.courseCount, 14, `${trackId}: 특수 9과목 + 중복과목 5과목`);
+    assert.equal(special.detail.totalCredits, 42);
+    assert.equal(special.completed, true);
+    assert.equal(special.detail.basicCourseCount, 9, "중복과목은 특수교육 기본이수로 세지 않는다");
+    assert.equal(result.duplication.accepted.length, 5);
+    assert.equal(findRequirement(result, "majorCredits").detail.transcriptCredits, 42);
+  }
+});
+
+test("직업교육을 쓰지 않는 유형에서도 진단평가는 특수교육 기본이수 과목이다", () => {
+  const state = stateWithChecked(["06044"], 2023, "minor");
+  const special = findRequirement(evaluateGraduation(state), "specialEducation").detail;
+
+  assert.equal(special.basicCourseCount, 1);
+  assert.equal(special.courseCount, 1);
 });
 
 test("복수전공(직업교육): 제2전공은 학점 기준 없이 학생이 학과에 확인한 뒤 직접 체크한다", () => {
