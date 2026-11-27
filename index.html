@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <title>졸업사정 자가체크</title>
+    <!-- 화면이 그려지기 전에 저장된 화면 모드를 적용해서, 밝은 화면을 쓰는 사람에게 어두운 화면이 번쩍이지 않게 한다. 기본은 다크모드. -->
+    <script>
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem("graduation-theme") === "light" ? "light" : "dark";
+      } catch (error) {
+        document.documentElement.dataset.theme = "dark";
+      }
+    </script>
+  </head>
+  <body>
+    <!-- React 화면이 이 div 안에 그려진다 -->
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

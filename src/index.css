@@ -1,0 +1,361 @@
+/* ============================================================
+   전체 스타일
+   - 색상은 변수로 모아 두었다. 기본은 다크모드이고, 상단의 버튼으로 밝은 화면(light)으로 바꿀 수 있다.
+   - 화면 폭이 좁은 모바일에서는 맨 아래의 @media 규칙으로 여백과 배치를 조정한다.
+   ============================================================ */
+
+/* ---------- 색상: 다크모드(기본) ---------- */
+:root {
+  --color-bg: #0e131a;
+  --color-card: #161d27;
+  --color-hover: #1d2633;
+  --color-border: #283241;
+  --color-text: #e8edf4;
+  --color-muted: #9aa6b6;
+  --color-primary: #7aa8f5;
+  --color-primary-strong: #3a6fd1;
+  --color-primary-soft: #1b2a44;
+  --color-on-primary: #ffffff;
+  --color-success: #52c88a;
+  --color-success-soft: #143325;
+  --color-todo: #f2a65a;
+  --color-todo-soft: #3a2a14;
+  --color-danger: #f28b82;
+  color-scheme: dark;
+}
+
+/* ---------- 색상: 밝은 화면 ---------- */
+:root[data-theme="light"] {
+  --color-bg: #f4f6fa;
+  --color-card: #ffffff;
+  --color-hover: #f4f6fa;
+  --color-border: #dde2ea;
+  --color-text: #1d2733;
+  --color-muted: #64707d;
+  --color-primary: #2a5db0;
+  --color-primary-strong: #2a5db0;
+  --color-primary-soft: #e8f0fc;
+  --color-success: #1f8a4c;
+  --color-success-soft: #e4f5ec;
+  --color-todo: #b45309;
+  --color-todo-soft: #fdf1e0;
+  --color-danger: #c0392b;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  /* 별도 글꼴 파일 없이 기기에 들어 있는 한글 글꼴을 쓴다. (파일 용량을 줄이고 HTML 한 파일 배포를 가볍게 하기 위해) */
+  font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+h1, h2, p { margin: 0; }
+
+/* ---------- 상단 바 (모든 화면 공통) ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+}
+.topbar-title { font-weight: 700; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.topbar-actions .button { white-space: nowrap; }
+
+/* ---------- 화면 공통 ---------- */
+.screen {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.screen-header { margin-bottom: 8px; }
+.screen-header h1 { font-size: 1.8rem; margin: 4px 0 8px; }
+.eyebrow { color: var(--color-primary); font-weight: 600; font-size: 0.9rem; }
+.lead { color: var(--color-muted); }
+.help { color: var(--color-muted); font-size: 0.88rem; margin-top: 8px; }
+
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.card h2 { font-size: 1.05rem; margin-bottom: 12px; }
+
+/* ---------- 선택 칩 / 옵션 ---------- */
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  padding: 8px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+  user-select: none;
+}
+.chip.selected, .option.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+/* 라디오 버튼 자체는 숨기고, 카드 전체를 눌러서 선택한다 */
+.chip input, .option input { position: absolute; opacity: 0; pointer-events: none; }
+.chip:focus-within, .option:focus-within { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--color-text);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.option-list { display: flex; flex-direction: column; gap: 8px; }
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.option-title { font-weight: 600; }
+.option-sub { font-size: 0.85rem; color: var(--color-muted); }
+.option.selected .option-sub { color: inherit; opacity: 0.85; }
+
+/* ---------- 버튼 ---------- */
+.button-row { display: flex; justify-content: flex-end; gap: 8px; }
+.button-row.left { justify-content: flex-start; margin-top: 12px; flex-wrap: wrap; }
+
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-family: inherit;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.button.primary { background: var(--color-primary-strong); color: var(--color-on-primary); }
+.button.secondary { background: var(--color-card); border-color: var(--color-border); color: var(--color-text); }
+.button.danger { background: var(--color-card); border-color: var(--color-border); color: var(--color-danger); }
+.button.small { padding: 6px 12px; font-size: 0.88rem; }
+.button:disabled { opacity: 0.45; cursor: not-allowed; }
+.button:focus-visible, .back-link:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+/* ---------- 요건 현황 ---------- */
+.progress-head { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.progress-bar { height: 10px; background: var(--color-bg); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--color-primary-strong); transition: width 0.3s; }
+.success-note { margin-top: 12px; color: var(--color-success); font-weight: 600; }
+
+.requirement-list { list-style: none; margin: 0; padding: 0; }
+.requirement-list li { border-bottom: 1px solid var(--color-border); }
+.requirement-list li:last-child { border-bottom: none; }
+
+/* 요건 한 줄: 눌러서 체크 화면으로 이동하는 버튼 */
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 12px 4px;
+  font-family: inherit;
+  font-size: 1rem;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.requirement-item:hover:not(:disabled) { background: var(--color-hover); }
+.requirement-item:disabled { cursor: default; opacity: 0.6; }
+.requirement-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.requirement-title { font-weight: 600; }
+.requirement-summary { font-size: 0.85rem; color: var(--color-muted); }
+.chevron { color: var(--color-muted); font-size: 1.4rem; }
+
+/* "아직 남은 일" 목록 */
+.shortfall-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.shortfall-list strong { display: block; }
+.shortfall-list ul { margin: 4px 0 0; padding-left: 20px; color: var(--color-muted); font-size: 0.9rem; }
+
+.status {
+  min-width: 56px;
+  text-align: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.status.done { background: var(--color-success-soft); color: var(--color-success); }
+.status.todo { background: var(--color-todo-soft); color: var(--color-todo); }
+
+/* ---------- 요건별 체크 화면 ---------- */
+.back-link {
+  align-self: flex-start;
+  padding: 4px 0;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.page-title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.page-title h1 { font-size: 1.6rem; }
+
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.section-head h2 { margin-bottom: 0; }
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; font-weight: 600; }
+.input {
+  padding: 9px 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  min-width: 0;
+}
+.input.narrow { width: 80px; }
+.meta { color: var(--color-muted); font-size: 0.88rem; font-weight: 400; }
+.note { font-size: 0.8rem; }
+.grow { flex: 1; }
+.strike { text-decoration: line-through; color: var(--color-muted); }
+
+.result-line { margin-top: 16px; font-weight: 700; color: var(--color-primary); }
+
+.check-list, .edit-list { list-style: none; margin: 0; padding: 0; }
+.check-row { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 0; cursor: pointer; }
+.check-row input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; }
+.check-row .meta { margin-left: auto; white-space: nowrap; }
+.check-row.disabled { opacity: 0.6; cursor: not-allowed; }
+/* 과목명과 안내 문구가 길면 줄을 바꿔서, 좁은 화면에서도 옆으로 넘치지 않게 한다 */
+.course-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+
+.edit-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+.edit-row .input:first-child { flex: 1; }
+
+.form-grid { display: flex; flex-direction: column; gap: 12px; }
+.inline-field { display: flex; align-items: center; gap: 8px; }
+
+.status-line { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
+
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border-radius: 999px;
+}
+
+.notice { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; }
+.notice.warn { background: var(--color-todo-soft); color: var(--color-todo); }
+.notice.info { background: var(--color-primary-soft); color: var(--color-primary); }
+
+.plain-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.plain-list li { padding: 6px 0; }
+.plain-list.calc li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--color-border); }
+.plain-list.calc li.total { font-weight: 700; color: var(--color-primary); border-bottom: none; }
+.option-info li { padding: 10px 12px; margin-bottom: 8px; border: 1px solid var(--color-border); border-radius: 10px; }
+.option-info li.recommended { border-color: var(--color-primary); background: var(--color-primary-soft); }
+
+.count-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; flex-wrap: wrap; }
+
+/* ---------- 시작 안내 화면 ---------- */
+.notice-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.notice-list li { display: flex; flex-direction: column; gap: 2px; padding-left: 14px; border-left: 3px solid var(--color-primary); }
+.notice-list span { color: var(--color-muted); font-size: 0.92rem; }
+.notice-list a { color: var(--color-primary); }
+
+/* ---------- 체크한 과목 한눈에 보기 ---------- */
+.overview-body.collapsed { display: none; }
+.overview-section { margin-top: 16px; }
+.overview-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 4px; border-bottom: 1px solid var(--color-border); }
+.overview-head h3 { margin: 0; font-size: 1rem; color: var(--color-primary); }
+.overview-list { list-style: none; margin: 0; padding: 0; }
+.overview-list li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--color-border); font-size: 0.93rem; }
+.overview-list li span:first-child { overflow-wrap: anywhere; }
+.overview-list .meta { text-align: right; }
+
+/* ---------- 백업(저장/불러오기) ---------- */
+.backup-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.file-button input { display: none; }
+
+/* ---------- 안내 배너 ---------- */
+.warning-banner {
+  background: var(--color-todo-soft);
+  color: var(--color-todo);
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* ---------- 모바일 (폭 560px 이하) ---------- */
+@media (max-width: 560px) {
+  /* 좁은 화면에서는 제목을 숨기고 버튼들을 한 줄에 맞춘다 */
+  .topbar { padding: 8px 12px; }
+  .topbar-title { display: none; }
+  .screen { padding: 20px 12px 48px; gap: 12px; }
+  .screen-header h1 { font-size: 1.5rem; }
+  .page-title h1 { font-size: 1.35rem; }
+  .card { padding: 16px; }
+
+  /* 하단 버튼은 가로로 꽉 채워 누르기 쉽게 한다 */
+  .button-row .button { flex: 1; }
+  .button-row.left .button { flex: none; }
+
+  /* 입력 줄은 좁으면 아래로 내려 쓴다 */
+  .edit-row { flex-wrap: wrap; }
+  .edit-row .input:first-child { flex-basis: 100%; }
+  .count-row .grow { flex-basis: 100%; }
+}
+
+/* ---------- 인쇄: 밝은 색으로, 버튼류는 숨김 ---------- */
+@media print {
+  :root {
+    --color-bg: #ffffff;
+    --color-card: #ffffff;
+    --color-border: #cccccc;
+    --color-text: #000000;
+    --color-muted: #444444;
+    --color-primary: #1a3f80;
+    --color-primary-soft: #eeeeee;
+    --color-success: #146c36;
+    --color-success-soft: #eeeeee;
+    --color-todo: #8a3f00;
+    --color-todo-soft: #eeeeee;
+  }
+  .topbar, .button-row, .back-link, .no-print { display: none !important; }
+  .card { break-inside: avoid; }
+  /* 화면에서 접어 둔 "체크한 과목" 내역도 인쇄할 때는 모두 펼친다 */
+  .overview-body.collapsed { display: block !important; }
+}
