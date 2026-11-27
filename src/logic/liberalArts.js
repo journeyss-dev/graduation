@@ -16,15 +16,18 @@ export function getBasicLiberalCourses(state) {
 }
 
 // 기초교양을 판정한다. 목록의 모든 과목을 체크해야 이수 완료이다.
+// 학생이 "요건을 모두 만족하였습니다"를 체크했다면(allConfirmed) 과목 체크와 상관없이 이수로 본다.
 export function evaluateBasicLiberal(state) {
   const courses = getBasicLiberalCourses(state);
   const checkedCourses = courses.filter((course) => state.basicLiberal.checked[course.name]);
 
   const requiredCredits = courses.reduce((sum, course) => sum + course.credits, 0);
   const earnedCredits = checkedCourses.reduce((sum, course) => sum + course.credits, 0);
+  const allConfirmed = state.basicLiberalAllConfirmed === true;
 
   return {
-    completed: courses.length > 0 && checkedCourses.length === courses.length,
+    completed: allConfirmed || (courses.length > 0 && checkedCourses.length === courses.length),
+    allConfirmed,
     requiredCredits,
     earnedCredits,
     missing: courses.filter((course) => !state.basicLiberal.checked[course.name]).map((c) => c.name),
@@ -36,9 +39,12 @@ export function evaluateBasicLiberal(state) {
 // 중핵교양을 판정한다.
 //  ① 영역마다 최소 학점 이상 이수  ② 전체 합계가 총 학점 이상
 // (영역 최소 학점의 합이 총 학점보다 작으면, 남는 학점은 아무 영역에서 채워도 된다.)
+// 학생이 "요건을 모두 만족하였습니다"를 체크했다면(allConfirmed) 입력한 과목과 상관없이 이수로 본다.
 export function evaluateCoreLiberal(state) {
+  const allConfirmed = state.coreLiberalAllConfirmed === true;
+
   const rule = findRuleForYear(coreLiberalArts, state.admissionYear);
-  if (!rule) return { completed: false, areas: [], earnedCredits: 0, requiredCredits: 0 };
+  if (!rule) return { completed: allConfirmed, allConfirmed, areas: [], earnedCredits: 0, requiredCredits: 0 };
 
   // 영역별 이수 학점 계산
   const areas = rule.areas.map((area) => {
@@ -53,7 +59,8 @@ export function evaluateCoreLiberal(state) {
   const earnedCredits = areas.reduce((sum, area) => sum + area.earned, 0);
 
   return {
-    completed: areas.every((area) => area.completed) && earnedCredits >= rule.totalCredits,
+    completed: allConfirmed || (areas.every((area) => area.completed) && earnedCredits >= rule.totalCredits),
+    allConfirmed,
     areas,
     earnedCredits,
     requiredCredits: rule.totalCredits,

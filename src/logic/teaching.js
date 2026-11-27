@@ -5,12 +5,15 @@
 
 import { teachingCourses, teachingExclusiveGroups } from "../rules/courses.js";
 import { teaching, countRequirements } from "../rules/requirements.js";
-import { getTrack, sumCredits } from "./utils.js";
+import { getTrack, isCourseAvailableForTrack, sumCredits } from "./utils.js";
 
 // 체크한 교직 과목 중 "둘 중 하나만 인정" 묶음(교직실무)에서 중복 체크된 것을 걸러낸다.
 // 묶음 안에서 가장 먼저 체크된 과목만 인정하고, 나머지는 conflicts에 담는다.
 function pickCountedCourses(state) {
-  const checked = teachingCourses.filter((course) => state.checkedCourses[course.code]);
+  // 이 이수 유형에서 쓰는 과목만 대상으로 한다. (예: 복수전공이 아니면 제2전공 학교현장실습은 제외)
+  const checked = teachingCourses.filter(
+    (course) => state.checkedCourses[course.code] && isCourseAvailableForTrack(course, state.trackId),
+  );
   const conflicts = [];
 
   const counted = checked.filter((course) => {

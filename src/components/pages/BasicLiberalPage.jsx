@@ -1,5 +1,6 @@
 import { useState } from "react";
 import RequirementPage from "../RequirementPage.jsx";
+import AllConfirmedCheck from "../AllConfirmedCheck.jsx";
 import { getBasicLiberalCourses } from "../../logic/liberalArts.js";
 
 // 과목명을 입력하는 칸. 글자를 입력하는 동안에는 임시로 들고 있다가, 입력을 마치면(blur) 확정한다.
@@ -95,6 +96,12 @@ export default function BasicLiberalPage({ requirement, state, onChange, onBack 
 
   return (
     <RequirementPage title={requirement.title} completed={requirement.completed} onBack={onBack}>
+      <AllConfirmedCheck
+        label="기초교양 요건을 모두 만족하였습니다."
+        checked={state.basicLiberalAllConfirmed}
+        onChange={(checked) => onChange({ basicLiberalAllConfirmed: checked })}
+      />
+
       <section className="card">
         <div className="section-head">
           <h2>{state.admissionYear}학번 필수 과목</h2>

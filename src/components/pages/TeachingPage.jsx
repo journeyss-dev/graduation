@@ -4,23 +4,26 @@ import StatusLine from "../StatusLine.jsx";
 import { setCourseChecked, isChecked } from "../courseHelpers.js";
 import { teachingCourses, teachingExclusiveGroups } from "../../rules/courses.js";
 import { teaching, countRequirements } from "../../rules/requirements.js";
+import { isCourseAvailableForTrack } from "../../logic/utils.js";
 
 // 요건 8: 교직과정 화면.
 // 교직소양 6학점 + 교직이론 12학점 + 교육실습 + 횟수 요건(적성검사·심폐소생술 등)을 확인한다.
 export default function TeachingPage({ requirement, state, onChange, onBack }) {
   const detail = requirement.detail;
 
-  // 교직 과목 체크를 바꾼다. "하나만 선택" 묶음(교직실무)은 한쪽을 체크하면 다른 쪽을 해제한다.
-  function toggleCourse(code, checked) {
-    const checkedCourses = { ...state.checkedCourses, [code]: checked };
+  // "하나만 선택" 묶음(교직실무 2학점 / 1학점)에서 다른 과목이 이미 체크되어 있으면 true.
+  // 이 경우 이 과목은 체크할 수 없게 막는다. (먼저 다른 쪽 체크를 풀어야 바꿀 수 있다)
+  function isBlockedByExclusiveCourse(code) {
+    const group = teachingExclusiveGroups.find((codes) => codes.includes(code));
+    if (!group) return false;
+    return group.some((otherCode) => otherCode !== code && isChecked(state, otherCode));
+  }
 
-    if (checked) {
-      const exclusiveGroup = teachingExclusiveGroups.find((codes) => codes.includes(code));
-      for (const otherCode of exclusiveGroup ?? []) {
-        if (otherCode !== code) checkedCourses[otherCode] = false;
-      }
-    }
-    onChange({ checkedCourses });
+  // 교직실무 두 과목에 붙일 안내 문구. 하나를 체크하면 다른 하나는 선택할 수 없다는 점을 알려준다.
+  function noteForLiteracyCourse(code) {
+    if (!teachingExclusiveGroups.some((codes) => codes.includes(code))) return "";
+    if (isBlockedByExclusiveCourse(code)) return "(다른 교직실무를 선택해서 체크할 수 없어요)";
+    return code === "04718" ? "(이전 학번 이수자용 · 둘 중 하나만 선택)" : "(둘 중 하나만 선택)";
   }
 
   // 횟수 요건 입력값을 바꾼다.
@@ -60,8 +63,9 @@ export default function TeachingPage({ requirement, state, onChange, onBack }) {
                   <CourseCheckRow
                     course={course}
                     checked={isChecked(state, course.code)}
-                    onToggle={(value) => toggleCourse(course.code, value)}
-                    note={course.code === "04718" ? "(이전 학번 이수자용 · 교직실무는 하나만 선택)" : ""}
+                    onToggle={(value) => setCourseChecked(state, onChange, course.code, value)}
+                    disabled={isBlockedByExclusiveCourse(course.code)}
+                    note={noteForLiteracyCourse(course.code)}
                   />
                 </li>
               ))}
@@ -78,7 +82,7 @@ export default function TeachingPage({ requirement, state, onChange, onBack }) {
         </div>
         <ul className="check-list">
           {teachingCourses
-            .filter((course) => course.group === "practice")
+            .filter((course) => course.group === "practice" && isCourseAvailableForTrack(course, state.trackId))
             .map((course) => (
               <li key={course.code}>
                 <CourseCheckRow

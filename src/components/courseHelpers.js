@@ -10,3 +10,9 @@ export function setCourseChecked(state, onChange, code, checked) {
 export function isChecked(state, code) {
   return state.checkedCourses[code] === true;
 }
+
+// 이수 시기를 화면에 보여줄 글자로 바꾼다.
+// "1-1" → "1-1학기" (학년-학기 형식에만 "학기"를 붙이고, "4학년" 같은 값은 그대로 둔다)
+export function formatTerm(term) {
+  return /^\d-\d$/.test(term) ? `${term}학기` : term;
+}

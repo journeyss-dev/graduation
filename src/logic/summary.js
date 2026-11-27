@@ -14,9 +14,8 @@ export function summarizeRequirement(requirement) {
       return `${detail.earned} / ${TOTAL_REQUIRED_CREDITS}학점`;
 
     case "basicLiberal":
-      return `${detail.earnedCredits} / ${detail.requiredCredits}학점`;
-
     case "coreLiberal":
+      if (detail.allConfirmed) return "요건을 모두 만족했다고 체크함";
       return `${detail.earnedCredits} / ${detail.requiredCredits}학점`;
 
     case "majorBasic": {

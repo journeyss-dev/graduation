@@ -80,14 +80,15 @@ export const majorCourses = [
 //   theory    교직이론영역 (12학점 이상)
 //   practice  교육실습영역 (제1전공심화·부전공 2과목 4학점 / 복수전공 3과목 6학점)
 // required: 반드시 이수해야 하는 교직 필수 과목
+// onlyTracks: 이 이수 유형(trackId)을 선택한 경우에만 보이고 인정되는 과목 (없으면 모든 유형)
 export const teachingCourses = [
   // --- 교직소양 ---
   { code: "04782", name: "특수교육학개론", credits: 2, term: "1-1", group: "literacy", required: true },
   { code: "06021", name: "학교폭력예방및학생의이해", credits: 2, term: "4-1", group: "literacy", required: true },
   // 교직실무는 원래 2학점이었으나, 디지털교육(1학점)이 신설되면서 1학점으로 줄었다.
   // 교직소양은 6학점만 채우면 되므로, 예전 2학점 과목을 이수한 학생도 체크할 수 있게 둘 다 둔다.
-  { code: "04718", name: "교직실무(2학점)", credits: 2, term: "4-1", group: "literacy" }, // 이전 학번 이수자용
-  { code: "07160", name: "교직실무(특수교육)", credits: 1, term: "4-1", group: "literacy" }, // 현행 (시트의 "교직실무(1학점)")
+  { code: "04718", name: "교직실무(특수교육) (2학점)", credits: 2, term: "4-1", group: "literacy" }, // 이전 학번 이수자용
+  { code: "07160", name: "교직실무(특수교육) (1학점)", credits: 1, term: "4-1", group: "literacy" }, // 현행
   { code: "07161", name: "디지털교육", credits: 1, group: "literacy", required: true },
 
   // --- 교직이론 ---
@@ -104,7 +105,8 @@ export const teachingCourses = [
   // --- 교육실습 ---
   { code: "04714", name: "교육봉사활동", credits: 2, term: "3-2", group: "practice", required: true },
   { code: "04735", name: "학교현장실습(특수교육)", credits: 2, term: "4-1", group: "practice", required: true },
-  { code: "05699", name: "학교현장실습", credits: 2, term: "4-1", group: "practice" }, // 복수전공: 제2전공 교과의 현장실습
+  // 복수전공(교직 복수): 제2전공 교과의 현장실습. 4-1·4-2학기 모두 가능해서 "4학년"으로만 표시한다.
+  { code: "05699", name: "학교현장실습", credits: 2, term: "4학년", group: "practice", onlyTracks: ["double-vocational", "double-special"] },
 ];
 
 // 둘 중 하나만 선택할 수 있는 교직 과목 묶음 (시트 비고: "하나만 체크")

@@ -38,7 +38,14 @@ export default function Dashboard({ state, result, availablePageIds, onOpenRequi
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
         </div>
-        {result.allCompleted && <p className="success-note">모든 요건을 충족했어요. 졸업 사정을 신청할 수 있습니다.</p>}
+        {result.allCompleted && (
+          <>
+            <p className="success-note">졸업이 가능합니다.</p>
+            <div className="notice warn">
+              ⚠ 이 졸업사정에는 오류가 있을 수 있어요. 반드시 학과 조교님께 확인을 받으세요.
+            </div>
+          </>
+        )}
         {reminders.map((rule) => (
           <div key={rule.id} className="notice warn">⚠ {rule.warning}</div>
         ))}

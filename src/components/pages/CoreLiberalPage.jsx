@@ -1,5 +1,6 @@
 import { useState } from "react";
 import RequirementPage from "../RequirementPage.jsx";
+import AllConfirmedCheck from "../AllConfirmedCheck.jsx";
 import { CORE_COURSE_CREDITS } from "../../rules/liberalArts.js";
 
 // 요건 3: 중핵교양 화면.
@@ -31,6 +32,12 @@ export default function CoreLiberalPage({ requirement, state, onChange, onBack }
 
   return (
     <RequirementPage title={requirement.title} completed={requirement.completed} onBack={onBack}>
+      <AllConfirmedCheck
+        label="중핵교양 요건을 모두 만족하였습니다."
+        checked={state.coreLiberalAllConfirmed}
+        onChange={(checked) => onChange({ coreLiberalAllConfirmed: checked })}
+      />
+
       <section className="card">
         <p className="help">
           영역마다 최소 학점 이상 이수하고, 전체 {requiredCredits}학점을 채워야 해요.

@@ -258,7 +258,26 @@ test("교직실무 두 과목을 모두 체크하면 하나만 인정하고 충�
   const teaching = findRequirement(evaluateGraduation(state), "teaching").detail;
 
   assert.equal(teaching.literacyCredits, 2, "먼저 체크된 교직실무(2학점)만 인정");
-  assert.deepEqual(teaching.conflicts, ["교직실무(특수교육)"]);
+  assert.deepEqual(teaching.conflicts, ["교직실무(특수교육) (1학점)"]);
+});
+
+test("학교현장실습(제2전공)은 복수전공이 아닌 유형에서는 체크해도 인정하지 않는다", () => {
+  const state = stateWithChecked(["04714", "04735", "05699"], 2023, "first-major");
+  const teaching = findRequirement(evaluateGraduation(state), "teaching").detail;
+
+  assert.equal(teaching.practiceCourseCount, 2, "제2전공 학교현장실습은 제외하고 2과목만 센다");
+});
+
+test("기초교양·중핵교양: '요건을 모두 만족하였습니다'를 체크하면 이수로 본다", () => {
+  const state = createInitialState(2025);
+  assert.equal(findRequirement(evaluateGraduation(state), "basicLiberal").completed, false);
+  assert.equal(findRequirement(evaluateGraduation(state), "coreLiberal").completed, false);
+
+  state.basicLiberalAllConfirmed = true;
+  state.coreLiberalAllConfirmed = true;
+  const result = evaluateGraduation(state);
+  assert.equal(findRequirement(result, "basicLiberal").completed, true);
+  assert.equal(findRequirement(result, "coreLiberal").completed, true);
 });
 
 test("복수전공은 교육실습이 3과목 6학점 필요하다", () => {

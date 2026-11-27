@@ -30,6 +30,12 @@ export function createInitialState(admissionYear, trackId = "first-major") {
     // 직업교육 과목은 중복 대상이면 특수교육에도 자동 인정되지만, 반대는 학생이 직접 고른다.
     alsoCountedInJob: {},
 
+    // "기초교양 요건을 모두 만족하였습니다" 체크. 체크하면 과목을 일일이 체크하지 않아도 기초교양을 이수한 것으로 본다.
+    basicLiberalAllConfirmed: false,
+
+    // "중핵교양 요건을 모두 만족하였습니다" 체크. 체크하면 과목을 일일이 입력하지 않아도 중핵교양을 이수한 것으로 본다.
+    coreLiberalAllConfirmed: false,
+
     // 기초교양: 과목 목록을 학생이 고친 경우 customCourses에 저장 (null이면 입학년도 기본 목록 사용)
     basicLiberal: {
       customCourses: null, // 예: [{ name: "인간학1", credits: 2 }, ...]

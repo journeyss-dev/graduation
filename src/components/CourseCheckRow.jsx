@@ -1,3 +1,5 @@
+import { formatTerm } from "./courseHelpers.js";
+
 // 과목 하나를 체크박스 한 줄로 보여준다. (전공·교직 체크 화면에서 공통으로 사용)
 // - course: 과목 데이터 (rules/courses.js 의 항목)
 // - checked: 체크 여부
@@ -15,7 +17,7 @@ export default function CourseCheckRow({ course, checked, onToggle = () => {}, n
         {note && <span className="meta note"> {note}</span>}
       </span>
       <span className="meta">
-        {course.term ? `${course.term} · ` : ""}
+        {course.term ? `${formatTerm(course.term)} · ` : ""}
         {course.credits}학점
       </span>
     </label>

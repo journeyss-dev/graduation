@@ -7,7 +7,7 @@ import { majorBasicRequiredCourse, teachingCourses } from "../rules/courses.js";
 import { countRequirements, majorBasic } from "../rules/requirements.js";
 import { getBasicLiberalCourses } from "./liberalArts.js";
 import { isBasicCourse } from "./major.js";
-import { getTrack, sumCredits } from "./utils.js";
+import { getTrack, isCourseAvailableForTrack, sumCredits } from "./utils.js";
 
 // 영역 안에서의 분류 이름
 const MAJOR_GROUP_LABELS = {
@@ -39,7 +39,11 @@ export function buildCourseOverview(state, result) {
   const basicItems = getBasicLiberalCourses(state)
     .filter((course) => state.basicLiberal.checked[course.name])
     .map((course) => ({ name: course.name, detail: `${course.credits}학점`, credits: course.credits }));
-  sections.push({ id: "basicLiberal", title: "기초교양", summary: summarizeCourses(basicItems), items: basicItems });
+  const basicSummary = summarizeCourses(basicItems); // "요건 모두 만족" 항목을 넣기 전에 과목 수를 센다
+  if (state.basicLiberalAllConfirmed) {
+    basicItems.unshift({ name: "기초교양 요건을 모두 만족하였습니다", detail: "직접 체크", credits: 0 });
+  }
+  sections.push({ id: "basicLiberal", title: "기초교양", summary: basicSummary, items: basicItems });
 
   // ----- 중핵교양 -----
   const coreItems = state.coreLiberalCourses.map((course) => ({
@@ -47,7 +51,11 @@ export function buildCourseOverview(state, result) {
     detail: `${course.area} · ${course.credits}학점`,
     credits: course.credits,
   }));
-  sections.push({ id: "coreLiberal", title: "중핵교양", summary: summarizeCourses(coreItems), items: coreItems });
+  const coreSummary = summarizeCourses(coreItems);
+  if (state.coreLiberalAllConfirmed) {
+    coreItems.unshift({ name: "중핵교양 요건을 모두 만족하였습니다", detail: "직접 체크", credits: 0 });
+  }
+  sections.push({ id: "coreLiberal", title: "중핵교양", summary: coreSummary, items: coreItems });
 
   // ----- 전공기초 -----
   const majorBasicItems = [];
@@ -106,7 +114,7 @@ export function buildCourseOverview(state, result) {
 
   // ----- 교직 -----
   const teachingItems = teachingCourses
-    .filter((course) => state.checkedCourses[course.code])
+    .filter((course) => state.checkedCourses[course.code] && isCourseAvailableForTrack(course, state.trackId))
     .map((course) => ({ name: course.name, detail: `${course.credits}학점 · ${TEACHING_GROUP_LABELS[course.group]}`, credits: course.credits }));
   const countItems = countRequirements.map((rule) => ({
     name: rule.label,
