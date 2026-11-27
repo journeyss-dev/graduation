@@ -5,6 +5,7 @@
 import { basicLiberalArts, coreLiberalArts, findRuleForYear } from "../rules/liberalArts.js";
 import { majorBasic } from "../rules/requirements.js";
 import { majorBasicRequiredCourse } from "../rules/courses.js";
+import { getTrack } from "./utils.js";
 
 // ===== 요건 2: 기초교양 =====
 
@@ -70,9 +71,14 @@ export function evaluateCoreLiberal(state) {
 // ===== 요건 4: 전공기초 =====
 
 // 전공기초(9학점)를 판정한다.
-// 장애의이해와재활(필수) + 사회과학 계열 3학점 + 사회과학 외 계열 3학점
+// 장애의이해와재활(필수) + 사회과학계열 과목 + 사회과학 외 과목 (각 3학점)
+// 복수전공이면 복수전공(제2전공)의 전공기초 과목 이수도 함께 확인한다. (학점은 보지 않고 체크 여부만 확인)
 export function evaluateMajorBasic(state) {
+  const track = getTrack(state.trackId);
   const requiredCourseChecked = state.checkedCourses[majorBasicRequiredCourse.code] === true;
+
+  const needsSecondMajorBasic = track.secondMajor?.requiresBasicCourses === true;
+  const secondMajorBasicDone = !needsSecondMajorBasic || state.secondMajorBasicDone === true;
 
   // 계열별로 필요한 학점을 채웠는지 확인한다.
   const slots = majorBasic.freeSlots.map((slot) => {
@@ -81,8 +87,10 @@ export function evaluateMajorBasic(state) {
   });
 
   return {
-    completed: requiredCourseChecked && slots.every((slot) => slot.completed),
+    completed: requiredCourseChecked && slots.every((slot) => slot.completed) && secondMajorBasicDone,
     requiredCourseChecked,
     slots,
+    needsSecondMajorBasic,
+    secondMajorBasicDone,
   };
 }

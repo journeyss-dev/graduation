@@ -45,10 +45,19 @@ function findRequirement(result, id) {
 
 // ---------- 전체 ----------
 
-test("아무것도 입력하지 않으면 완료된 요건이 없다", () => {
+test("과목을 하나도 체크하지 않으면, 기본값으로 채워진 총 이수 학점만 이수로 나온다", () => {
   const result = evaluateGraduation(createInitialState(2023));
-  assert.equal(result.completedCount, 0);
+  const completedIds = result.requirements.filter((r) => r.completed).map((r) => r.id);
+
+  assert.deepEqual(completedIds, ["totalCredits"]);
   assert.equal(result.allCompleted, false);
+});
+
+test("기본값: 총 이수 학점은 130, 교직 횟수는 각 요건을 채운 값(2/2/4/1)이다", () => {
+  const state = createInitialState(2023);
+
+  assert.equal(state.totalCredits, 130);
+  assert.deepEqual(state.counts, { aptitude: 2, cpr: 2, genderEducation: 4, drugTest: 1 });
 });
 
 // ---------- 전공: 중복 인정 ----------
@@ -76,15 +85,16 @@ test("필수 과목(특수교육교육과정론)을 빼면 특수교육이 미�
   assert.deepEqual(special.detail.missingRequired, ["특수교육교육과정론"]);
 });
 
-test("중복 인정은 5과목·15학점을 넘으면 초과로 분류된다", () => {
-  const state = stateWithChecked([...JOB_COURSES, ...SPECIAL_COURSES, "02424"]); // 행동수정 추가
-  state.alsoCountedInJob["02424"] = true; // 직업교육 쪽에도 인정 요청 → 이미 5과목이라 초과
+test("중복과목은 5과목·15학점을 넘으면 초과로 분류된다", () => {
+  // 직업교육 중복과목 5개 + 진단평가를 직업교육에서 선택 = 중복과목 6개
+  const state = stateWithChecked([...JOB_COURSES, ...SPECIAL_COURSES, "06044"]);
+  state.diagnosisAssignedTo = "job";
 
   const { duplication } = evaluateGraduation(state);
   assert.equal(duplication.accepted.length, 5);
   assert.equal(duplication.credits, 15);
   assert.equal(duplication.overflow.length, 1);
-  assert.equal(duplication.overflow[0].course.name, "행동수정");
+  assert.equal(duplication.overflow[0].name, "재활실습", "목록 순서상 마지막 중복과목이 초과분이 된다");
 });
 
 test("진단평가는 선택한 쪽의 기본이수로만 인정된다", () => {
@@ -102,7 +112,7 @@ test("진단평가는 선택한 쪽의 기본이수로만 인정된다", () => {
   assert.equal(job(toJob).basicCourseCount, 1);
 });
 
-test("진단평가를 직업교육에서 선택하면 특수교육에는 자동 인정(중복)으로만 들어간다", () => {
+test("진단평가를 직업교육에서 선택하면 특수교육에는 중복과목으로만 들어간다", () => {
   const state = stateWithChecked(["06044"]);
   state.diagnosisAssignedTo = "job";
 
@@ -110,15 +120,14 @@ test("진단평가를 직업교육에서 선택하면 특수교육에는 자동 
   const special = findRequirement(result, "specialEducation").detail;
 
   assert.equal(special.basicCourseCount, 0, "특수교육 기본이수로는 세지 않는다");
-  assert.equal(special.courseCount, 1, "특수교육 전체 과목에는 자동 인정으로 들어온다");
+  assert.equal(special.courseCount, 1, "특수교육 전체 과목에는 중복과목으로 들어온다");
   assert.equal(result.duplication.accepted.length, 1);
-  assert.equal(result.duplication.accepted[0].alsoCountedIn, "special");
+  assert.equal(result.duplication.accepted[0].code, "06044");
 });
 
-test("진단평가를 특수교육 기본이수로 선택하면 직업교육·중복 인정에는 들어가지 않는다", () => {
+test("진단평가를 특수교육 기본이수로 선택하면 직업교육·중복과목에는 들어가지 않는다", () => {
   const state = stateWithChecked(["06044"]);
   state.diagnosisAssignedTo = "special";
-  state.alsoCountedInJob["06044"] = true; // 실수로 요청해도 무시되어야 한다
 
   const result = evaluateGraduation(state);
   assert.equal(findRequirement(result, "subjectArea").detail.courseCount ?? 0, 0);
@@ -224,6 +233,15 @@ test("전공기초: 필수 과목 + 사회과학 3학점 + 사회과학 외 3학
   assert.equal(findRequirement(evaluateGraduation(state), "majorBasic").completed, false);
 
   state.majorBasicFreeCredits.nonSocial = 3;
+  assert.equal(findRequirement(evaluateGraduation(state), "majorBasic").completed, true);
+});
+
+test("복수전공은 전공기초에서 복수전공 전공기초 과목 이수 체크도 필요하다", () => {
+  const state = stateWithChecked(["06775"], 2023, "double-vocational");
+  state.majorBasicFreeCredits = { social: 3, nonSocial: 3 };
+  assert.equal(findRequirement(evaluateGraduation(state), "majorBasic").completed, false);
+
+  state.secondMajorBasicDone = true;
   assert.equal(findRequirement(evaluateGraduation(state), "majorBasic").completed, true);
 });
 

@@ -15,7 +15,7 @@ import { getTrack, sumCredits } from "./utils.js";
 
 // "특수교육대상학생진단및평가": 특수교육/직업교육 기본이수 중 한쪽을 골라서 이수하는 특별 과목
 //  - 특수교육 기본이수로 선택 → 특수교육에서만 인정 (직업교육에는 들어가지 않음)
-//  - 직업교육 기본이수로 선택 → 직업교육 기본이수 + 특수교육에는 "자동 인정된 과목"(중복 인정)으로 들어감
+//  - 직업교육 기본이수로 선택 → 직업교육 기본이수 + 특수교육에는 "중복과목"으로 들어감
 export const DIAGNOSIS_CODE = "06044";
 
 // ===== 1. 체크한 과목을 특수교육 쪽 / 직업교육 쪽으로 나누기 =====
@@ -28,11 +28,11 @@ function decideOwnSide(course, state, track) {
   return track.usesJobEducation ? state.diagnosisAssignedTo : "special";
 }
 
-// 학생이 체크한 전공 과목을 두 쪽으로 나누고, 중복 인정 과목을 반대쪽에도 넣어 준다.
+// 학생이 체크한 전공 과목을 두 쪽으로 나누고, 직업교육의 중복과목을 특수교육에도 넣어 준다.
 // - state: 학생 입력 상태
 // - 반환: { specialSide, jobSide, duplication: { accepted, overflow, credits } }
-//     specialSide / jobSide : 각 요건에서 인정되는 과목 목록 (중복 인정 포함)
-//     duplication.accepted  : 중복으로 인정된 과목, overflow: 한도(5과목·15학점) 초과로 제외된 과목
+//     specialSide / jobSide : 각 요건에서 인정되는 과목 목록 (중복과목 포함)
+//     duplication.accepted  : 특수교육에도 인정된 중복과목, overflow: 한도(5과목·15학점) 초과로 제외된 중복과목
 export function sortIntoSides(state) {
   const track = getTrack(state.trackId);
   const specialSide = [];
@@ -49,44 +49,28 @@ export function sortIntoSides(state) {
     else jobSide.push(course);
   }
 
-  // 중복 인정 후보를 모은다.
-  //  - 직업교육 과목: 중복 대상이면 특수교육에도 자동으로 인정
-  //    (진단평가를 직업교육에서 선택했다면 이 경우에 해당한다)
-  //  - 특수교육 과목: 중복 대상이고 학생이 직접 고른 경우에만 직업교육에도 인정
-  //    (진단평가를 특수교육 기본이수로 선택했다면 직업교육에는 들어가지 않는다)
-  const candidates = [];
-  if (track.usesJobEducation) {
-    for (const course of jobSide) {
-      if (course.canDuplicate) {
-        candidates.push({ course, alsoCountedIn: "special" });
-      }
-    }
-    for (const course of specialSide) {
-      const chosenByStudent = state.alsoCountedInJob[course.code] === true;
-      if (course.canDuplicate && course.code !== DIAGNOSIS_CODE && chosenByStudent) {
-        candidates.push({ course, alsoCountedIn: "job" });
-      }
-    }
-  }
+  // 중복과목 후보: 직업교육 쪽에서 체크한 과목 중 중복 대상(canDuplicate)인 과목은 특수교육에도 인정된다.
+  // (진단평가를 직업교육에서 선택했다면 여기에 해당하고, 특수교육 기본이수로 선택했다면 해당하지 않는다.)
+  // 2021학번부터는 특수교육 과목을 직업교육 쪽으로 중복 인정하는 경우가 없어서, 반대 방향은 다루지 않는다.
+  const candidates = track.usesJobEducation ? jobSide.filter((course) => course.canDuplicate) : [];
 
   // 후보를 순서대로 인정하되, 5과목·15학점 한도를 넘으면 초과로 분류한다.
   const accepted = [];
   const overflow = [];
   let acceptedCredits = 0;
 
-  for (const candidate of candidates) {
+  for (const course of candidates) {
     const isWithinCourseLimit = accepted.length < duplication.maxCourses;
-    const isWithinCreditLimit = acceptedCredits + candidate.course.credits <= duplication.maxCredits;
+    const isWithinCreditLimit = acceptedCredits + course.credits <= duplication.maxCredits;
 
     if (!isWithinCourseLimit || !isWithinCreditLimit) {
-      overflow.push(candidate);
+      overflow.push(course);
       continue;
     }
 
-    accepted.push(candidate);
-    acceptedCredits += candidate.course.credits;
-    if (candidate.alsoCountedIn === "special") specialSide.push(candidate.course);
-    else jobSide.push(candidate.course);
+    accepted.push(course);
+    acceptedCredits += course.credits;
+    specialSide.push(course);
   }
 
   return { specialSide, jobSide, duplication: { accepted, overflow, credits: acceptedCredits } };
@@ -95,7 +79,7 @@ export function sortIntoSides(state) {
 // 과목이 해당 쪽(side)의 "기본이수과목"으로 인정되는지 확인한다.
 // - 중복 인정으로 반대쪽에 들어온 과목은 area가 달라서 기본이수로 세지 않는다.
 // - 진단평가(area가 both)는 학생이 선택한 쪽에서만 기본이수이다.
-//   직업교육에서 선택했다면 특수교육에는 "자동 인정된 과목"으로만 들어가고 기본이수로는 세지 않는다.
+//   직업교육에서 선택했다면 특수교육에는 "중복과목"으로만 들어가고 기본이수로는 세지 않는다.
 export function isBasicCourse(course, side, state) {
   if (course.group !== "basic") return false;
   if (course.area === "both") return decideOwnSide(course, state, getTrack(state.trackId)) === side;

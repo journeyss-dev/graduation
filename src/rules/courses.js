@@ -15,7 +15,8 @@
 //                 subjectEducation 교과교육영역 (직업교육 표시과목)
 //                 curriculum       교육과정영역 (직업교육 표시과목, 21학번부터 필수)
 //                 general          그 외 일반 과목
-//   canDuplicate  true면 "중복 인정" 가능 과목 (직업교육 ↔ 특수교육 양쪽 학점으로 인정, 최대 15학점)
+//   canDuplicate  true면 "중복과목" (직업교육 과목이면서 특수교육 학점으로도 인정, 최대 5과목 15학점)
+//                 직업교육 쪽 과목과 진단평가에만 있다. 2021학번부터는 특수교육 과목을 직업교육으로 중복 인정하지 않는다.
 //   required      true면 해당 영역에서 반드시 이수해야 하는 필수 과목
 //
 // 값이 없는 필드(canDuplicate, required)는 false로 취급한다.
@@ -39,18 +40,18 @@ export const majorCourses = [
 
   // --- 2학년 ---
   { code: "06044", name: "특수교육대상학생진단및평가", credits: 3, term: "2-1", area: "both", group: "basic", canDuplicate: true }, // 특수교육 or 직업교육 중 택1
-  { code: "02424", name: "행동수정", credits: 3, term: "2-1", area: "special", group: "general", canDuplicate: true },
+  { code: "02424", name: "행동수정", credits: 3, term: "2-1", area: "special", group: "general" },
   { code: "02706", name: "직업재활개론", credits: 3, term: "2-1", area: "job", group: "basic", canDuplicate: true },
-  { code: "06043", name: "의사소통장애학생교육", credits: 3, term: "2-1", area: "special", group: "basic", canDuplicate: true },
-  { code: "06045", name: "특수교육교육과정론", credits: 3, term: "2-1", area: "special", group: "basic", canDuplicate: true, required: true },
+  { code: "06043", name: "의사소통장애학생교육", credits: 3, term: "2-1", area: "special", group: "basic" },
+  { code: "06045", name: "특수교육교육과정론", credits: 3, term: "2-1", area: "special", group: "basic", required: true },
   { code: "02723", name: "전환교육", credits: 3, term: "2-2", area: "job", group: "basic", canDuplicate: true },
   { code: "07068", name: "특수교육국어·사회교육과정", credits: 3, term: "2-2", area: "job", group: "curriculum", required: true },
-  { code: "06602", name: "재활의학", credits: 3, term: "2-2", area: "special", group: "general", canDuplicate: true },
+  { code: "06602", name: "재활의학", credits: 3, term: "2-2", area: "special", group: "general" },
   { code: "02721", name: "직업재활상담", credits: 3, term: "2-2", area: "job", group: "basic", canDuplicate: true },
 
   // --- 3학년 ---
   { code: "04836", name: "직업교육교과교육론", credits: 3, term: "3-1", area: "job", group: "subjectEducation", required: true },
-  { code: "02712", name: "장애인부모교육및상담", credits: 3, term: "3-1", area: "special", group: "general", canDuplicate: true },
+  { code: "02712", name: "장애인부모교육및상담", credits: 3, term: "3-1", area: "special", group: "general" },
   { code: "06042", name: "학습장애학생교육", credits: 3, term: "3-1", area: "special", group: "basic" },
   { code: "07066", name: "특수교육수학·과학교육과정", credits: 3, term: "3-1", area: "job", group: "curriculum", required: true },
   { code: "02728", name: "지원고용", credits: 3, term: "3-1", area: "job", group: "basic" },
@@ -67,10 +68,10 @@ export const majorCourses = [
   { code: "04666", name: "직업특수교육지도의논리및윤리", credits: 3, term: "4-1", area: "job", group: "subjectEducation", canDuplicate: true, required: true },
   { code: "05062", name: "재활실습", credits: 3, term: "4-1", area: "job", group: "basic", canDuplicate: true }, // 지도교수님과 상담 필수
   { code: "06828", name: "직무개발과배치", credits: 3, term: "4-1", area: "job", group: "basic" },
-  { code: "04287", name: "특수교육재활공학", credits: 3, term: "4-2", area: "special", group: "basic", canDuplicate: true },
+  { code: "04287", name: "특수교육재활공학", credits: 3, term: "4-2", area: "special", group: "basic" },
   { code: "06046", name: "청각장애학생교육", credits: 3, term: "4-2", area: "special", group: "basic" },
   { code: "06040", name: "시각장애학생교육", credits: 3, term: "4-2", area: "special", group: "basic" }, // 계절학기 개설
-  { code: "06049", name: "중도·중복장애학생교육과재활", credits: 3, term: "4-2", area: "special", group: "basic", canDuplicate: true },
+  { code: "06049", name: "중도·중복장애학생교육과재활", credits: 3, term: "4-2", area: "special", group: "basic" },
   { code: "05061", name: "직업교육과재활연구", credits: 3, term: "4-2", area: "job", group: "general" },
 ];
 

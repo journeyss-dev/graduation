@@ -46,7 +46,7 @@ export default function SubjectAreaPage({ requirement, result, state, onChange, 
             checked={diagnosisChecked && !diagnosisChosenInSpecial}
             disabled={diagnosisChosenInSpecial}
             onToggle={toggleDiagnosis}
-            note={diagnosisChosenInSpecial ? "특수교육 기본이수 과목으로 선택했어요." : "(특수교육에도 자동 인정)"}
+            note={diagnosisChosenInSpecial ? "특수교육 기본이수 과목으로 선택했어요." : "(중복과목)"}
           />
         </li>
       );
@@ -58,7 +58,7 @@ export default function SubjectAreaPage({ requirement, result, state, onChange, 
           course={course}
           checked={isChecked(state, course.code)}
           onToggle={(value) => setCourseChecked(state, onChange, course.code, value)}
-          note={course.canDuplicate ? "(특수교육에도 자동 인정)" : ""}
+          note={course.canDuplicate ? "(중복과목)" : ""}
         />
       </li>
     );
@@ -71,11 +71,6 @@ export default function SubjectAreaPage({ requirement, result, state, onChange, 
     { title: "교육과정영역", courses: jobCourses.filter((c) => c.group === "curriculum") },
     { title: "그 외 직업교육 과목", courses: jobCourses.filter((c) => c.group === "general") },
   ];
-
-  // 특수교육 과목 중 직업교육 학점으로도 인정받을 수 있는 과목 (중복 인정 후보)
-  const duplicableSpecialCourses = majorCourses.filter(
-    (course) => course.area === "special" && course.canDuplicate,
-  );
 
   return (
     <RequirementPage title={requirement.title} completed={requirement.completed} onBack={onBack}>
@@ -99,26 +94,6 @@ export default function SubjectAreaPage({ requirement, result, state, onChange, 
           <ul className="check-list">{section.courses.map(renderCourse)}</ul>
         </section>
       ))}
-
-      <section className="card">
-        <h2>특수교육 과목을 표시과목 학점으로도 인정받기</h2>
-        <p className="help">
-          특수교육 화면에서 체크한 과목 중 아래 과목은 표시과목 학점으로도 인정받을 수 있어요. (중복 인정 한도 안에서)
-        </p>
-        <ul className="check-list">
-          {duplicableSpecialCourses.map((course) => (
-            <li key={course.code}>
-              <CourseCheckRow
-                course={course}
-                checked={state.alsoCountedInJob[course.code] === true}
-                disabled={!isChecked(state, course.code)}
-                note={isChecked(state, course.code) ? "" : "(특수교육 화면에서 먼저 체크하세요)"}
-                onToggle={(value) => onChange({ alsoCountedInJob: { ...state.alsoCountedInJob, [course.code]: value } })}
-              />
-            </li>
-          ))}
-        </ul>
-      </section>
 
       <DuplicationNotice duplication={result.duplication} />
     </RequirementPage>

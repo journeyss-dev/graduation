@@ -31,9 +31,8 @@ export function buildCourseOverview(state, result) {
   const track = getTrack(state.trackId);
   const sections = [];
 
-  // 중복 인정으로 반대쪽에도 들어간 과목 코드 모음 (어느 쪽에서 추가로 인정됐는지)
-  const alsoInSpecial = new Set(result.duplication.accepted.filter((a) => a.alsoCountedIn === "special").map((a) => a.course.code));
-  const alsoInJob = new Set(result.duplication.accepted.filter((a) => a.alsoCountedIn === "job").map((a) => a.course.code));
+  // 중복과목으로 특수교육에도 인정된 과목 코드 모음
+  const alsoInSpecial = new Set(result.duplication.accepted.map((course) => course.code));
 
   // ----- 기초교양 -----
   const basicItems = getBasicLiberalCourses(state)
@@ -64,17 +63,20 @@ export function buildCourseOverview(state, result) {
   }
   for (const slot of majorBasic.freeSlots) {
     if ((state.majorBasicFreeCredits[slot.id] ?? 0) >= slot.credits) {
-      majorBasicItems.push({ name: `${slot.label} 이수 과목`, detail: `${slot.credits}학점`, credits: slot.credits });
+      majorBasicItems.push({ name: `${slot.label} 과목 이수완료`, detail: `${slot.credits}학점`, credits: slot.credits });
     }
   }
-  sections.push({ id: "majorBasic", title: "전공기초", summary: summarizeCourses(majorBasicItems), items: majorBasicItems });
+  const majorBasicSummary = summarizeCourses(majorBasicItems);
+  if (state.secondMajorBasicDone && track.secondMajor?.requiresBasicCourses) {
+    majorBasicItems.push({ name: "복수전공 전공기초 과목 이수완료", detail: "직접 체크", credits: 0 });
+  }
+  sections.push({ id: "majorBasic", title: "전공기초", summary: majorBasicSummary, items: majorBasicItems });
 
   // ----- 특수교육 -----
   const specialItems = result.sides.specialSide.map((course) => {
     const tags = [];
     if (isBasicCourse(course, "special", state)) tags.push("기본이수");
-    if (alsoInSpecial.has(course.code)) tags.push("직업교육 과목에서 자동 인정");
-    if (alsoInJob.has(course.code)) tags.push("표시과목에도 인정");
+    if (alsoInSpecial.has(course.code)) tags.push("중복과목(직업교육에서 인정)");
     return { name: course.name, detail: [`${course.credits}학점`, ...tags].join(" · "), credits: course.credits };
   });
   sections.push({ id: "specialEducation", title: "특수교육", summary: summarizeCourses(specialItems), items: specialItems });
@@ -82,9 +84,8 @@ export function buildCourseOverview(state, result) {
   // ----- 표시과목(직업교육) -----
   if (track.usesJobEducation) {
     const jobItems = result.sides.jobSide.map((course) => {
-      const tags = [];
-      tags.push(alsoInJob.has(course.code) ? "특수교육 과목에서 인정" : MAJOR_GROUP_LABELS[course.group]);
-      if (alsoInSpecial.has(course.code)) tags.push("특수교육에도 인정");
+      const tags = [MAJOR_GROUP_LABELS[course.group]];
+      if (alsoInSpecial.has(course.code)) tags.push("중복과목");
       return { name: course.name, detail: [`${course.credits}학점`, ...tags].join(" · "), credits: course.credits };
     });
     sections.push({ id: "subjectArea", title: "표시과목(직업교육)", summary: summarizeCourses(jobItems), items: jobItems });

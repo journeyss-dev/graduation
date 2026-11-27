@@ -17,8 +17,8 @@ export const majorBasic = {
   totalCredits: 9,
   requiredCredits: 3, // 장애의이해와재활
   freeSlots: [
-    { id: "social", label: "사회과학 계열", credits: 3 },
-    { id: "nonSocial", label: "사회과학 외 계열", credits: 3 },
+    { id: "social", label: "사회과학계열", credits: 3 },
+    { id: "nonSocial", label: "사회과학 외", credits: 3 },
   ],
 };
 
@@ -54,8 +54,10 @@ export const duplication = {
 // ---------- 복수전공의 제2전공 ----------
 // 제2전공 이수 학점 기준은 학과마다 다르므로 이 앱이 판정하지 않는다.
 // 학생이 해당 학과에 확인한 뒤 "충족했다"고 직접 체크하는 방식(selfCheck)으로 처리한다.
+// requiresBasicCourses: 복수전공은 제2전공의 전공기초 과목도 이수해야 한다. (학점은 확인하지 않고 이수 여부만 체크)
 const SECOND_MAJOR_ASK_DEPARTMENT = {
   selfCheck: true,
+  requiresBasicCourses: true,
   notice: "제2전공 이수 기준은 학과마다 다릅니다. 제2전공 학과에 문의해서 확인해 주세요.",
 };
 

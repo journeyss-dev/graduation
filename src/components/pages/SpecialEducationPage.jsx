@@ -22,7 +22,7 @@ export default function SpecialEducationPage({ requirement, result, state, onCha
 
   // 진단평가 한 줄을 만든다.
   //  - 표시과목(직업교육)에서 이미 선택했다면: 취소선 + 안내를 보여주고 여기서는 체크할 수 없다.
-  //    (이 경우 맨 아래 "중복 인정"에 자동 인정 과목으로 들어간다)
+  //    (이 경우 맨 아래 "중복과목 현황"에 중복과목으로 들어간다)
   //  - 그렇지 않으면: 여기서 체크할 수 있고, 체크하면 특수교육 기본이수로 선택한 것이 된다.
   function renderDiagnosis(course) {
     const checked = isChecked(state, course.code);

@@ -99,6 +99,9 @@ export default function TeachingPage({ requirement, state, onChange, onBack }) {
       <section className="card">
         <h2>횟수로 확인하는 항목</h2>
         <p className="help">지금까지 받은 횟수를 입력하세요.</p>
+        <div className="notice warn">
+          ⚠ 입력하는 수고를 줄이려고 기본값을 모두 채운 횟수로 해 두었어요. 실제로 모두 받았는지 반드시 확인하고, 다르면 숫자를 고쳐 주세요.
+        </div>
         {detail.counts.items.map((item) => {
           const rule = countRequirements.find((requirementItem) => requirementItem.id === item.id);
           return (

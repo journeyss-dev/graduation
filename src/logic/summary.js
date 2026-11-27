@@ -19,9 +19,10 @@ export function summarizeRequirement(requirement) {
       return `${detail.earnedCredits} / ${detail.requiredCredits}학점`;
 
     case "majorBasic": {
-      const slotText = detail.slots.map((slot) => `${slot.label} ${slot.earned}/${slot.requiredCredits}`);
+      const slotText = detail.slots.map((slot) => `${slot.label} ${slot.completed ? "이수" : "미이수"}`);
       const requiredText = detail.requiredCourseChecked ? "필수 과목 이수" : "필수 과목 미이수";
-      return [requiredText, ...slotText].join(" · ");
+      const secondText = detail.needsSecondMajorBasic ? [`복수전공 ${detail.secondMajorBasicDone ? "이수" : "미이수"}`] : [];
+      return [requiredText, ...slotText, ...secondText].join(" · ");
     }
 
     case "subjectArea":
@@ -80,7 +81,8 @@ export function describeShortfalls(requirement) {
 
     case "majorBasic":
       if (!detail.requiredCourseChecked) lines.push("장애의이해와재활 미이수");
-      for (const slot of detail.slots) if (!slot.completed) lines.push(`${slot.label} 미이수`);
+      for (const slot of detail.slots) if (!slot.completed) lines.push(`${slot.label} 과목 미이수`);
+      if (!detail.secondMajorBasicDone) lines.push("복수전공 전공기초 과목 미이수");
       break;
 
     case "subjectArea":

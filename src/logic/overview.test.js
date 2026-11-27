@@ -30,12 +30,12 @@ test("체크한 과목이 영역별로 정리된다 (특수교육 14과목, 표�
   assert.equal(findSection(sections, "specialEducation").summary, "14과목 42학점");
 });
 
-test("직업교육 과목에서 자동 인정된 과목은 특수교육 목록에 그 표시가 붙는다", () => {
+test("직업교육의 중복과목은 특수교육 목록에 그 표시가 붙는다", () => {
   const state = createStudent();
   const sections = buildCourseOverview(state, evaluateGraduation(state));
 
   const autoAccepted = findSection(sections, "specialEducation").items.filter((item) =>
-    item.detail.includes("직업교육 과목에서 자동 인정"),
+    item.detail.includes("중복과목"),
   );
   assert.equal(autoAccepted.length, 5);
 });

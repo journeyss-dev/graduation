@@ -1,3 +1,4 @@
+import Icon from "./Icon.jsx";
 import { GRADUATION_INFO_URL } from "../rules/requirements.js";
 
 // 모든 화면 맨 위에 보이는 상단 바.
@@ -11,25 +12,28 @@ export default function TopBar({ onHome, theme, onToggleTheme }) {
 
   return (
     <header className="topbar">
-      <div className="topbar-actions">
+      <div className="topbar-group">
         {onHome && (
-          <button className="button small secondary" onClick={onHome}>
-            ← 처음으로
+          <button className="pill" onClick={onHome}>
+            <Icon name="home" />
+            처음으로
           </button>
         )}
         <span className="topbar-title">졸업사정 자가체크</span>
       </div>
 
-      <div className="topbar-actions">
-        <a className="button small secondary" href={GRADUATION_INFO_URL} target="_blank" rel="noopener noreferrer">
-          졸업요건 확인 ↗
+      <div className="topbar-group">
+        <a className="pill" href={GRADUATION_INFO_URL} target="_blank" rel="noopener noreferrer">
+          졸업요건 확인
+          <Icon name="external" size={14} />
         </a>
         <button
-          className="button small secondary"
+          className="pill icon-only"
           onClick={onToggleTheme}
           aria-label={isDark ? "밝은 화면으로 바꾸기" : "다크모드로 바꾸기"}
+          title={isDark ? "밝은 화면으로" : "다크모드로"}
         >
-          {isDark ? "☀️ 밝게" : "🌙 어둡게"}
+          <Icon name={isDark ? "sun" : "moon"} size={18} />
         </button>
       </div>
     </header>
